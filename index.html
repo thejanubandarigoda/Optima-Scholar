@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Registration | School Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      padding: 40px 16px;
+      overflow-x: hidden;
+    }
+
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      animation: float 8s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #6c63ff, #3b82f6);
+      top: -100px; left: -100px;
+    }
+    body::after {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #f472b6, #a855f7);
+      bottom: -100px; right: -100px;
+      animation-delay: 4s;
+    }
+    @keyframes float {
+      from { transform: translateY(0) scale(1); }
+      to   { transform: translateY(40px) scale(1.05); }
+    }
+
+    /* ─── Card ─── */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 48px 44px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: slideUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Header ─── */
+    .header { text-align: center; margin-bottom: 36px; }
+    .header .icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 64px; height: 64px; border-radius: 18px;
+      background: linear-gradient(135deg, #6c63ff, #3b82f6);
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(108,99,255,0.45);
+    }
+    .header .icon svg { width: 32px; height: 32px; fill: #fff; }
+    .header h1 { font-size: 1.75rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+    .header p  { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 6px; }
+
+    /* ─── Section labels ─── */
+    .section-title {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #6c63ff;
+      margin: 28px 0 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(to right, rgba(108,99,255,0.4), transparent);
+    }
+
+    /* ─── Grid ─── */
+    .grid   { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+
+    /* ─── Field ─── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.65); }
+    .field label span { color: #f472b6; margin-left: 2px; }
+
+    .field input, .field select, .field textarea {
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+      outline: none;
+      width: 100%;
+    }
+    .field select option { background: #302b63; color: #fff; }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,0.25); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #6c63ff;
+      background: rgba(108,99,255,0.1);
+      box-shadow: 0 0 0 4px rgba(108,99,255,0.18);
+    }
+    .field input.error, .field select.error { border-color: #f472b6; box-shadow: 0 0 0 4px rgba(244,114,182,0.15); }
+    .field .hint { font-size: 0.75rem; color: #f472b6; min-height: 16px; display: none; }
+    .field .hint.show { display: block; }
+
+    /* ─── Radio ─── */
+    .radio-group { display: flex; gap: 12px; flex-wrap: wrap; }
+    .radio-option {
+      flex: 1; min-width: 90px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 10px 14px; border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.7);
+      font-size: 0.85rem; font-weight: 500; user-select: none;
+    }
+    .radio-option input[type="radio"] { display: none; }
+    .radio-option:has(input:checked) { border-color: #6c63ff; background: rgba(108,99,255,0.18); color: #fff; box-shadow: 0 0 0 4px rgba(108,99,255,0.15); }
+    .radio-option:hover { border-color: rgba(108,99,255,0.5); }
+
+    /* ─── Action buttons row ─── */
+    .btn-row { display: flex; gap: 14px; margin-top: 32px; }
+
+    .btn-submit {
+      flex: 1; padding: 15px;
+      border: none; border-radius: 14px; cursor: pointer;
+      background: linear-gradient(135deg, #6c63ff, #3b82f6);
+      color: #fff; font-size: 1rem; font-weight: 600;
+      font-family: inherit; letter-spacing: 0.3px;
+      box-shadow: 0 8px 24px rgba(108,99,255,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .btn-submit:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(108,99,255,0.55); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg,rgba(255,255,255,0.12),transparent); border-radius: inherit; }
+
+    .btn-view {
+      flex: 1; padding: 15px;
+      border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; cursor: pointer;
+      background: rgba(255,255,255,0.07);
+      color: #fff; font-size: 1rem; font-weight: 600;
+      font-family: inherit; letter-spacing: 0.3px;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .btn-view:hover  { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+    .btn-view:active { transform: translateY(0); }
+
+    /* ─── Overlay ─── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(5,4,25,0.75);
+      backdrop-filter: blur(6px);
+      animation: fadeIn 0.25s ease;
+    }
+    .overlay.open { display: flex; align-items: flex-end; justify-content: center; }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    /* ─── Students Panel (bottom sheet on mobile, centered modal on desktop) ─── */
+    .students-panel {
+      width: 100%; max-width: 900px;
+      max-height: 88vh;
+      background: linear-gradient(160deg, #1a1535, #12102a);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px 24px 0 0;
+      display: flex; flex-direction: column;
+      box-shadow: 0 -16px 60px rgba(0,0,0,0.6);
+      animation: panelUp 0.4s cubic-bezier(0.22,1,0.36,1);
+      overflow: hidden;
+    }
+    @keyframes panelUp { from { transform: translateY(60px); opacity:0; } to { transform:none; opacity:1; } }
+
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .panel-head h2 { font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .panel-head h2 .badge {
+      font-size: 0.72rem; background: linear-gradient(135deg,#6c63ff,#3b82f6);
+      padding: 3px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px;
+    }
+    .btn-close {
+      width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06); color: #fff; font-size: 1.1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .btn-close:hover { background: rgba(255,255,255,0.14); }
+
+    /* Search bar inside panel */
+    .panel-search {
+      padding: 14px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .panel-search input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 10px 14px;
+      color: #fff; font-family: inherit; font-size: 0.88rem; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .panel-search input::placeholder { color: rgba(255,255,255,0.3); }
+    .panel-search input:focus { border-color: #6c63ff; box-shadow: 0 0 0 3px rgba(108,99,255,0.2); }
+
+    /* Table scroll area */
+    .panel-body { overflow-y: auto; flex: 1; padding: 0 28px 24px; }
+    .panel-body::-webkit-scrollbar { width: 6px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb { background: rgba(108,99,255,0.4); border-radius: 4px; }
+
+    /* Table */
+    .students-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .students-table th {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      color: rgba(108,99,255,0.9); padding: 10px 12px; text-align: left;
+      border-bottom: 1px solid rgba(108,99,255,0.25);
+      white-space: nowrap;
+    }
+    .students-table td {
+      padding: 13px 12px; font-size: 0.85rem; color: rgba(255,255,255,0.82);
+      border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle;
+    }
+    .students-table tr:last-child td { border-bottom: none; }
+    .students-table tr { transition: background 0.15s; }
+    .students-table tr:hover td { background: rgba(108,99,255,0.08); }
+
+    /* Avatar chip */
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #f472b6);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 700; color: #fff;
+      margin-right: 8px; flex-shrink: 0;
+    }
+    .name-cell { display: flex; align-items: center; }
+
+    .gender-pill {
+      font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    }
+    .gender-pill.male   { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .gender-pill.female { background: rgba(244,114,182,0.18); color: #f9a8d4; }
+    .gender-pill.other  { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+
+    /* Delete button in table */
+    .btn-del {
+      border: none; background: rgba(239,68,68,0.12); color: #f87171;
+      border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 0.78rem;
+      transition: background 0.2s;
+    }
+    .btn-del:hover { background: rgba(239,68,68,0.25); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 48px 20px;
+      color: rgba(255,255,255,0.3);
+    }
+    .empty-state .es-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 24px; right: 24px; z-index: 999;
+      background: rgba(20,20,40,0.95); backdrop-filter: blur(12px);
+      border: 1px solid rgba(108,99,255,0.4);
+      color: #fff; padding: 16px 22px; border-radius: 14px;
+      font-size: 0.88rem; font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      display: flex; align-items: center; gap: 12px;
+      animation: toastIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+      max-width: 320px;
+    }
+    .toast.hide { animation: toastOut 0.3s ease forwards; }
+    @keyframes toastIn  { from { opacity:0; transform:translateY(-12px) scale(0.96); } to { opacity:1; transform:none; } }
+    @keyframes toastOut { to   { opacity:0; transform:translateY(-8px) scale(0.96); } }
+
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+
+    @media(max-width: 600px) {
+      .card { padding: 32px 22px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.4rem; }
+      .btn-row { flex-direction: column; }
+      .panel-head, .panel-search, .panel-body { padding-left: 18px; padding-right: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     REGISTRATION FORM CARD
+════════════════════════════════════════════ -->
+<div class="card">
+  <div class="header">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
+      </svg>
+    </div>
+    <h1>Student Registration</h1>
+    <p>Please fill in the details below to register a new student</p>
+  </div>
+
+  <form id="studentForm" novalidate autocomplete="off">
+
+    <!-- Personal Info -->
+    <div class="section-title">Personal Information</div>
+    <div class="grid grid-2">
+      <div class="field">
+        <label for="firstName">First Name <span>*</span></label>
+        <input type="text" id="firstName" placeholder="e.g. Amal" />
+        <span class="hint" id="firstNameErr">First name is required.</span>
+      </div>
+      <div class="field">
+        <label for="lastName">Last Name <span>*</span></label>
+        <input type="text" id="lastName" placeholder="e.g. Perera" />
+        <span class="hint" id="lastNameErr">Last name is required.</span>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="field">
+        <label for="dob">Date of Birth <span>*</span></label>
+        <input type="date" id="dob" />
+        <span class="hint" id="dobErr">Date of birth is required.</span>
+      </div>
+      <div class="field">
+        <label>Gender <span>*</span></label>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="gender" value="Male" /> ♂ Male</label>
+          <label class="radio-option"><input type="radio" name="gender" value="Female" /> ♀ Female</label>
+          <label class="radio-option"><input type="radio" name="gender" value="Other" /> ○ Other</label>
+        </div>
+        <span class="hint" id="genderErr">Please select a gender.</span>
+      </div>
+    </div>
+
+    <!-- Academic Info -->
+    <div class="section-title">Academic Information</div>
+    <div class="grid grid-2">
+      <div class="field">
+        <label for="studentId">Student ID <span>*</span></label>
+        <input type="text" id="studentId" placeholder="e.g. STU-2024-001" />
+        <span class="hint" id="studentIdErr">Student ID is required.</span>
+      </div>
+      <div class="field">
+        <label for="grade">Grade / Class <span>*</span></label>
+        <select id="grade">
+          <option value="" disabled selected>Select grade</option>
+          <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+          <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+          <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+          <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+          <option>Grade 13</option>
+        </select>
+        <span class="hint" id="gradeErr">Please select a grade.</span>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="field">
+        <label for="admissionDate">Admission Date <span>*</span></label>
+        <input type="date" id="admissionDate" />
+        <span class="hint" id="admissionDateErr">Admission date is required.</span>
+      </div>
+      <div class="field">
+        <label for="section">Section / Stream</label>
+        <select id="section">
+          <option value="" disabled selected>Select section</option>
+          <option>Science</option><option>Arts</option><option>Commerce</option>
+          <option>Technology</option><option>General</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="section-title">Contact &amp; Parent Information</div>
+    <div class="grid grid-2">
+      <div class="field">
+        <label for="parentName">Parent / Guardian Name <span>*</span></label>
+        <input type="text" id="parentName" placeholder="e.g. Kamal Perera" />
+        <span class="hint" id="parentNameErr">Parent name is required.</span>
+      </div>
+      <div class="field">
+        <label for="phone">Contact Number <span>*</span></label>
+        <input type="tel" id="phone" placeholder="e.g. 0771234567" maxlength="10" />
+        <span class="hint" id="phoneErr">Enter a valid 10-digit phone number.</span>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:16px">
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="e.g. student@school.lk" />
+        <span class="hint" id="emailErr">Enter a valid email address.</span>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:16px">
+      <div class="field">
+        <label for="address">Home Address</label>
+        <textarea id="address" placeholder="No. 12, Galle Road, Colombo 03"></textarea>
+      </div>
+    </div>
+
+    <hr class="divider" style="margin-top:28px" />
+
+    <!-- ── Two action buttons ── -->
+    <div class="btn-row">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        ✦&nbsp; Register Student
+      </button>
+      <button type="button" class="btn-view" id="viewBtn" onclick="openPanel()">
+        👥&nbsp; View Students
+      </button>
+    </div>
+  </form>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     VIEW STUDENTS OVERLAY + PANEL
+════════════════════════════════════════════ -->
+<div class="overlay" id="overlay" onclick="closePanel(event)">
+  <div class="students-panel" id="studentsPanel">
+
+    <div class="panel-head">
+      <h2>
+        Registered Students
+        <span class="badge" id="countBadge">0</span>
+      </h2>
+      <button class="btn-close" onclick="closePanel(null, true)" title="Close">✕</button>
+    </div>
+
+    <div class="panel-search">
+      <input type="text" id="searchInput" placeholder="🔍  Search by name, ID, grade…" oninput="renderTable()" />
+    </div>
+
+    <div class="panel-body">
+      <table class="students-table" id="studentsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>ID</th>
+            <th>Gender</th>
+            <th>Grade</th>
+            <th>Section</th>
+            <th>Date of Birth</th>
+            <th>Admitted</th>
+            <th>Contact</th>
+            <th>Parent</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="es-icon">🎓</div>
+        <p>No students registered yet.<br/>Fill in the form and hit <strong>Register Student</strong>.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+  const API = 'http://localhost:3000/api/students';
+
+  /* ── Toast ── */
+  function showToast(msg, icon = '🎉') {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    document.body.appendChild(t);
+    setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 400); }, 3200);
+  }
+
+  /* ── Validation helpers ── */
+  function showErr(id, errId, msg) {
+    document.getElementById(id)?.classList.add('error');
+    const e = document.getElementById(errId);
+    if (e) { e.textContent = msg; e.classList.add('show'); }
+  }
+  function clearErr(id, errId) {
+    document.getElementById(id)?.classList.remove('error');
+    document.getElementById(errId)?.classList.remove('show');
+  }
+
+  ['firstName','lastName','dob','studentId','grade','admissionDate','parentName','phone','email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input',  () => clearErr(id, id + 'Err'));
+    el.addEventListener('change', () => clearErr(id, id + 'Err'));
+  });
+  document.querySelectorAll('input[name="gender"]').forEach(r =>
+    r.addEventListener('change', () => document.getElementById('genderErr')?.classList.remove('show'))
+  );
+
+  function validate() {
+    let ok = true;
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    if (!v('firstName'))     { showErr('firstName','firstNameErr','First name is required.');            ok = false; }
+    if (!v('lastName'))      { showErr('lastName','lastNameErr','Last name is required.');                ok = false; }
+    if (!v('dob'))           { showErr('dob','dobErr','Date of birth is required.');                      ok = false; }
+    if (!v('studentId'))     { showErr('studentId','studentIdErr','Student ID is required.');             ok = false; }
+    if (!v('grade'))         { showErr('grade','gradeErr','Please select a grade.');                      ok = false; }
+    if (!v('admissionDate')) { showErr('admissionDate','admissionDateErr','Admission date is required.'); ok = false; }
+    if (!v('parentName'))    { showErr('parentName','parentNameErr','Parent name is required.');           ok = false; }
+    const phone = v('phone');
+    if (!phone)                       { showErr('phone','phoneErr','Contact number is required.');        ok = false; }
+    else if (!/^\d{10}$/.test(phone)) { showErr('phone','phoneErr','Must be exactly 10 digits.');         ok = false; }
+    if (!document.querySelector('input[name="gender"]:checked')) {
+      document.getElementById('genderErr').classList.add('show'); ok = false;
+    }
+    const email = v('email');
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showErr('email','emailErr','Enter a valid email address.'); ok = false;
+    }
+    return ok;
+  }
+
+  /* ── Form submit — saves to API ── */
+  document.getElementById('studentForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Registering…';
+
+    const get = id => (document.getElementById(id)?.value || '').trim();
+    const student = {
+      firstName:     get('firstName'),
+      lastName:      get('lastName'),
+      dob:           get('dob'),
+      gender:        document.querySelector('input[name="gender"]:checked')?.value || '',
+      studentId:     get('studentId'),
+      grade:         get('grade'),
+      admissionDate: get('admissionDate'),
+      section:       get('section'),
+      parentName:    get('parentName'),
+      phone:         get('phone'),
+      email:         get('email'),
+      address:       get('address'),
+    };
+
+    try {
+      const res = await fetch(API, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(student),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Server error ${res.status}`);
+      }
+      showToast(`${student.firstName} ${student.lastName} registered successfully!`);
+      document.getElementById('studentForm').reset();
+      document.querySelectorAll('.field input, .field select, .field textarea').forEach(el => el.classList.remove('error'));
+      document.querySelectorAll('.hint').forEach(h => h.classList.remove('show'));
+    } catch (err) {
+      showToast(`Error: ${err.message}`, '❌');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '✦&nbsp; Register Student';
+    }
+  });
+
+  /* ── Panel open / close ── */
+  function openPanel() {
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('searchInput').value = '';
+    document.body.style.overflow = 'hidden';
+    loadAndRender();
+  }
+  function closePanel(e, force) {
+    if (force || (e && e.target === document.getElementById('overlay'))) {
+      document.getElementById('overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  /* ── Fetch students from API then render ── */
+  let cachedStudents = [];
+
+  async function loadAndRender() {
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+    const table = document.getElementById('studentsTable');
+    // Show a loading indicator
+    table.style.display = 'none';
+    empty.style.display = 'block';
+    empty.innerHTML = `<div class="es-icon" style="animation:float 1s infinite alternate">⏳</div><p>Loading students…</p>`;
+
+    try {
+      const res = await fetch(API);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      cachedStudents = await res.json();
+    } catch (err) {
+      empty.innerHTML = `<div class="es-icon">⚠️</div><p>Could not reach server.<br/><small style="color:rgba(255,255,255,0.35)">${err.message}</small></p>`;
+      return;
+    }
+    renderTable();
+  }
+
+  /* ── Render the table (uses cachedStudents, applies search filter) ── */
+  function renderTable() {
+    const query    = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const filtered = query
+      ? cachedStudents.filter(s =>
+          `${s.firstName} ${s.lastName} ${s.studentId} ${s.grade} ${s.section} ${s.phone}`.toLowerCase().includes(query))
+      : cachedStudents;
+
+    document.getElementById('countBadge').textContent = cachedStudents.length;
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+    const table = document.getElementById('studentsTable');
+
+    if (filtered.length === 0) {
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      empty.innerHTML = cachedStudents.length === 0
+        ? `<div class="es-icon">🎓</div><p>No students registered yet.<br/>Fill in the form and hit <strong>Register Student</strong>.</p>`
+        : `<div class="es-icon">🔍</div><p>No students match your search.</p>`;
+      return;
+    }
+    table.style.display = '';
+    empty.style.display = 'none';
+
+    tbody.innerHTML = filtered.map((s, i) => {
+      const fn      = s.firstName || '';
+      const ln      = s.lastName  || '';
+      // Generate avatar initials safely
+      const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '?';
+      const gClass   = s.gender === 'Male' ? 'male' : s.gender === 'Female' ? 'female' : 'other';
+      const fmt      = d => d ? new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+      return `
+        <tr>
+          <td style="color:rgba(255,255,255,0.35);font-size:0.78rem">${i + 1}</td>
+          <td>
+            <div class="name-cell">
+              <div class="avatar">${initials}</div>
+              <div>
+                <div style="font-weight:600;color:#fff">${fn} ${ln}</div>
+                <div style="font-size:0.74rem;color:rgba(255,255,255,0.4)">${s.email || '—'}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-family:monospace;color:#a5b4fc">${s.studentId || '—'}</td>
+          <td><span class="gender-pill ${gClass}">${s.gender || '—'}</span></td>
+          <td>${s.grade || '—'}</td>
+          <td>${s.section || '—'}</td>
+          <td>${fmt(s.dob)}</td>
+          <td>${fmt(s.admissionDate)}</td>
+          <td style="font-family:monospace">${s.phone || '—'}</td>
+          <td>${s.parentName || '—'}</td>
+          <td><button class="btn-del" onclick="deleteStudent(${s.id})">🗑 Del</button></td>
+        </tr>`;
+    }).join('');
+  }
+
+  /* ── Delete student via API ── */
+  async function deleteStudent(id) {
+    if (!confirm('Remove this student record?')) return;
+    try {
+      const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Server error ${res.status}`);
+      }
+      showToast('Student record removed.', '🗑️');
+      // Remove from cache and re-render without a full network round-trip
+      cachedStudents = cachedStudents.filter(s => s.id !== id);
+      renderTable();
+    } catch (err) {
+      showToast(`Could not delete: ${err.message}`, '❌');
+    }
+  }
+</script>
+</body>
+</html>
